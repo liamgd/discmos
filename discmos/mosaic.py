@@ -1,6 +1,5 @@
 import math
 from pathlib import Path
-from time import time
 from typing import List, Tuple
 
 import torch
@@ -37,7 +36,7 @@ def run_mosaic(
     saturation_weight: float,
     value_weight: float,
 ) -> List[List[Emoji]]:
-    device = torch.device('cuda')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     image_tensors = []
 
     for emoji in emojis:
