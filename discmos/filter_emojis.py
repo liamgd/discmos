@@ -2,7 +2,13 @@ import re
 from typing import List, Set
 
 from .classes import Emoji, EmojiData
-from .constants import PREFIXES, REGEX_SEARCH, SPECIFIC_SEARCH, Mode
+from .constants import (
+    ALL_SEARCH,
+    PREFIXES,
+    REGEX_SEARCH,
+    SPECIFIC_SEARCH,
+    Mode,
+)
 
 
 def filter_emojis(emoji_data: EmojiData, include: str) -> List[Emoji]:
@@ -59,7 +65,7 @@ def filter_emojis(emoji_data: EmojiData, include: str) -> List[Emoji]:
                 mode = Mode.PASSIVE
                 server_search = line
 
-            if server_search == 'all':
+            if ALL_SEARCH.search(server_search):
                 current_servers = list(emoji_data.servers)
             elif (
                 specific_search := SPECIFIC_SEARCH.search(server_search)

@@ -3,8 +3,14 @@ from enum import Enum
 
 Mode = Enum('Mode', ['INCLUDE', 'EXCLUDE', 'PASSIVE'])
 PREFIXES = {'include': '+ ', 'exclude': '- ', 'emoji': '    '}
-SPECIFIC_SEARCH = re.compile(r'(?<=").*(?=")')
-REGEX_SEARCH = re.compile(r'(?<=^/).*(?=/$)')
+ALL_SEARCH = re.compile(r'(?<=^)all(?=( *// .*)?$)')
+SPECIFIC_SEARCH = re.compile(r'(?<=^").*(?="( *// .*)?$)')
+REGEX_SEARCH = re.compile(r'(?<=^/).*(?=/( *// .*)?$)')
+
+DEFAULT_INCLUDE = '''+ all
+// Replace with "- all" to include no emojis by default
+// Use + "<server name>" or - "<server name>" to include or exclude servers
+'''
 
 EMOJI_URL = (
     'https://cdn.discordapp.com/emojis/{ID}.webp?size=96&quality=lossless'

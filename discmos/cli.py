@@ -9,7 +9,7 @@ import win32clipboard
 from PIL import Image
 
 from .classes import Emoji
-from .constants import DISCORD_URL
+from .constants import DEFAULT_INCLUDE, DISCORD_URL
 from .download import download_emojis
 from .emoji_data import emojis_from_workspace
 from .mosaic import run_composite, run_mosaic
@@ -64,7 +64,7 @@ def init_workspace(workspace: Path) -> None:
     if not output_text_dir.is_dir():
         output_text_dir.mkdir()
     if not include_file.is_file():
-        include_file.write_text('+ all\n')
+        include_file.write_text(DEFAULT_INCLUDE)
     click.echo(f'Initialized {workspace}')
 
 

@@ -27,22 +27,6 @@ Run `discmos --help` to see a list of commands. Run `discmos <command> --help` t
 7. Use `discmos preview-include ./discmos-workspace/` to verify that the correct emojis are included.
 8. Run `discmos --save --show ./discmos-workspace/ source.jpg 40 8 composite 1000` (adjusting the parameters if desired) to show the mosaic, copy it to the clipboard, and save it to the output-images directory.
 
-## Computation Implementation
-
-After downloading, to remove transparency, the emoji files are saved over a background that is the same color as the Discord background on the desktop app.
-
-The emoji image files in the emojis directory are rescaled to a low resolution for performance and converted into PyTorch tensors.
-
-The source image is split into tiles that are the same size as the emojis after rescaling. These tiles are also converted into PyTorch tensors.
-
-The emoji tensors are stacked and the source image tensors are stacked to create two tensors of the shape (tile, channel, height, width). The channels represent the hue, saturation, and value for each pixel.
-
-After further processing, using singleton dimension slicing and operation broadcasting, the difference between the channel values of the pixels of each pair of emoji and source image tile is found. The absolute value is taken so that lower values correspond to less difference between pixel colors. Using singleton dimension slicing, the resulting tensor is multiplied element-wise by a channel weights tensor to control the importance hue, saturation, and value individually. The difference values for each pair of emoji and source image tile are summed to obtain one value that represents the difference between the two image tiles. After flattening, the argmin function is used to determine the emoji that is closest to the source image tile for every source image tile in the source image.
-
-## GPU Acceleration
-
-If a CUDA-enabled GPU is available, the tensors in the computation will use the CUDA device. If not, the CPU is used instead.
-
 ## Emoji Scraping
 
 The following instructions are printed upon running `discmos scrape`. The emojis are scraped by executing a javascript script in the console pane of the inspect element that saves emojis as they appear while scrolling in the Discord emoji pane.
@@ -61,6 +45,35 @@ Steps to scrape emojis:
 10. Save emoji-data.json in the workspace directory.
 11. You are done, and you can close the Discord tab.
 
+## Included Emojis
+
+The include.txt file dictates which emojis to include in both the `discmos download-all` command and the `discmos mosaic` command group.
+
+The `discmos preview-include` command prints the emojis that will be included based off of the include.txt file. This is useful while writing include.txt to verify functionality.
+
+<details open>
+<summary>Parsing details</summary>
+
+The include.txt file is read line by line, from top to bottom. Empty lines and lines starting with `// ` (comments) are ignored.
+
+Lines are either server lines or emoji lines. If a line starts with four spaces, it is an emoji lines. If a line starts with no spaces, it is a server line.
+
+Server and emoji lines have a modifier (ex. `+ ` or `- `) and a query (ex. "My Server").
+
+Emoji lines belong to the nearest server line before them. If
+
+Lines starting with the modifiers `+ ` or `- `, excluding indentation, include or exclude the emojis that are found from the following query, respectively. Emoji lines must start with either `+ ` or `- `. Server lines that start with neither modifer are passive, and only affect the emoji lines that belong to them.
+
+Queries can either be specific or a regular expression. If it is surrounded in quotes, only servers or emojis (depending on the indentation of the line) whose names exactly match the query are included. If it is surrounded in slashes, the query is treated as a Python regular expression, and any servers or emojis that the regular expression matches are included. Server lines can also have the query `all` without quotes or slashes, which refers to all emojis.
+
+</details>
+
+### Modifiers
+
+- Excluding indentation spaces, if a line starts with `+ `, the emojis found from the query are included.
+- Excluding indentation spaces, if a line starts with `- `, the emojis found from the query are excluded.
+- Server lines only: if the line does not start with `+ ` or `- `, it
+
 ## Composite Mosaic
 
 **This is how the Discord character limit that complicates sending the mosaic in emoji messages is bypassed.**
@@ -78,6 +91,22 @@ The text mosaic can be run with `discmos mosaic [--OPTIONS] [ARGUMENTS] text`.
 After computation, it will copy the text containing the emoji mosaic to the clipboard. The `--save` option saves the text to a file in `<workspace>/output-text`. The `--show` option prints the text in the terminal.
 
 To render the text into a mosaic image, paste it into discord. See the Discord Nitro section. If character count becomes an issue, paste fewer lines in multiple messages to show the full image. Note that there is a small gap between each message.
+
+## Computation Implementation
+
+After downloading, to remove transparency, the emoji files are saved over a background that is the same color as the Discord background on the desktop app.
+
+The emoji image files in the emojis directory are rescaled to a low resolution for performance and converted into PyTorch tensors.
+
+The source image is split into tiles that are the same size as the emojis after rescaling. These tiles are also converted into PyTorch tensors.
+
+The emoji tensors are stacked and the source image tensors are stacked to create two tensors of the shape (tile, channel, height, width). The channels represent the hue, saturation, and value for each pixel.
+
+After further processing, using singleton dimension slicing and operation broadcasting, the difference between the channel values of the pixels of each pair of emoji and source image tile is found. The absolute value is taken so that lower values correspond to less difference between pixel colors. Using singleton dimension slicing, the resulting tensor is multiplied element-wise by a channel weights tensor to control the importance hue, saturation, and value individually. The difference values for each pair of emoji and source image tile are summed to obtain one value that represents the difference between the two image tiles. After flattening, the argmin function is used to determine the emoji that is closest to the source image tile for every source image tile in the source image.
+
+## GPU Acceleration
+
+If a CUDA-enabled GPU is available, the tensors in the computation will use the CUDA device. If not, the CPU is used instead.
 
 ## Discord Nitro
 
