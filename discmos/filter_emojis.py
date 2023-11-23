@@ -11,7 +11,7 @@ def filter_emojis(emoji_data: EmojiData, include: str) -> List[Emoji]:
     lines = include.split('\n')
 
     for line in lines:
-        if line == '':
+        if line == '' or line.startswith('// '):
             continue
         elif line.startswith(PREFIXES['emoji']):
             if len(current_servers) == 0:
