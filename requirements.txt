@@ -4,5 +4,5 @@ Pillow~=10.1.0
 pyclip~=0.7.0
 requests~=2.26.0
 setuptools~=63.3.0
-torch~=1.13.1+cu116
-torchvision~=0.14.1+cu116
+torch~=1.13.1
+torchvision~=0.14.1
